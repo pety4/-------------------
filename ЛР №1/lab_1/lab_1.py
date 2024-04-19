@@ -381,11 +381,6 @@ def processing_experiment_1_results(exp_num,log_file_name, matrix_file_name):
           )
     return
 
-#функция обработки результатов эксперимента №1
-def processing_experiment_1_results(exp_num,log_file_name, matrix_file_name):
-
-
-    return
 
 #основная программа
 if __name__ == "__main__":
