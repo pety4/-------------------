@@ -39,6 +39,12 @@ z=1.96
 #желаемый показатель точности
 E_ideal=4.8
 
+#данные об экспериментах
+exp_1={'13':['1','3','6','9','13'],
+    '17':['1','3','6','9','13','17']}
+exp_2={'13':['500','450','400','350'],
+           '17':['600','550','500','450','400']}
+
 
 #функция очистки данных от выбросов и ложных нажатий
 def clear_data(matrix,log):
@@ -142,7 +148,7 @@ def info_channel_diagram_count(matrix):
     I_X_Y=I_count(matrix)
     H_X_cond_Y=np.round(H_X-I_X_Y,6)
     H_Y_cond_X=np.round(H_Y-I_X_Y,6)
-    return H_X, H_X_cond_Y, H_Y_cond_X, H_Y
+    return H_X, H_X_cond_Y, I_X_Y, H_Y_cond_X, H_Y
 
 #функция форматирования файла
 def file_formatting(filename):
@@ -233,7 +239,7 @@ def selective_standard_deviation_count(I,reaction_time,a,b):
     return sigma_T
 
 #функция построения линейной регрессии МНК с трубкой точности
-def linear_regression_LSM_plot(I,reaction_time):
+def linear_regression_LSM_plot(I,reaction_time, precision_tube=True):
     M_I=M_x_count(I)
     M_t=M_x_count(reaction_time)
     a=0
@@ -251,21 +257,23 @@ def linear_regression_LSM_plot(I,reaction_time):
              label='МНК')
     
     #построение трубки точности
-    sigma_T=selective_standard_deviation_count(I,reaction_time,a,b)
-    eps_a=sigma_T*t[n-2]*np.sqrt(1/n+np.power(M_I,2)/delta)
-    eps_b=sigma_T*t[n-2]*np.sqrt(1/delta)
-    eps_T=[]
-    for I_0 in I:
-        eps_T.append(sigma_T*t[n-2]*np.sqrt(1/n+np.power(I_0-M_I,2)/delta))
+    if precision_tube==True:
+        sigma_T=selective_standard_deviation_count(I,reaction_time,a,b)
+        eps_a=sigma_T*t[n-2]*np.sqrt(1/n+np.power(M_I,2)/delta)
+        eps_b=sigma_T*t[n-2]*np.sqrt(1/delta)
+        eps_T=[]
+        for I_0 in I:
+            eps_T.append(sigma_T*t[n-2]*np.sqrt(1/n+np.power(I_0-M_I,2)/delta))
 
-    plt.plot([I[0],I[-1]],
-             [(a+eps_a)+(b+eps_b)*I[0],(a+eps_a)+(b+eps_b)*I[-1]],
-             color='c',
-             label='Трубка точности')
-    plt.plot([I[0],I[-1]],
-             [(a-eps_a)+(b-eps_b)*I[0],(a-eps_a)+(b-eps_b)*I[-1]],
-             color='c')
-    return a, b, eps_a, eps_b, eps_T
+        plt.plot([I[0],I[-1]],
+                [(a+eps_a)+(b+eps_b)*I[0],(a+eps_a)+(b+eps_b)*I[-1]],
+                color='c',
+                label='Трубка точности')
+        plt.plot([I[0],I[-1]],
+                [(a-eps_a)+(b-eps_b)*I[0],(a-eps_a)+(b-eps_b)*I[-1]],
+                color='c')
+        return a, b, eps_a, eps_b, eps_T
+    return a,b
 
 #функция расчёта взвешенного среднего
 def weighted_average_count(arr,w):
@@ -298,23 +306,24 @@ def linear_regression_weighted_LSM_plot(I,reaction_time,log):
     return a, b
 
 #функция обработки результатов эксперимента №1
-def processing_experiment_1_results(exp_num,log_file_name, matrix_file_name):
+def processing_experiment_1_results(key_num,log_file_name, matrix_file_name):
     #форматируем файлы
     for log in log_file_name:
-        file_formatting(f'data_exp_1/{exp_num}_keys/{log}')
+        file_formatting(f'data_exp_1/{key_num}_keys/{log}')
     for matrix in matrix_file_name:
-        file_formatting(f'data_exp_1/{exp_num}_keys/{matrix}')
+        file_formatting(f'data_exp_1/{key_num}_keys/{matrix}')
 
     #считываем данные с файлов и убираем выбросы и неверные нажатия
     log=[]
     for file_name in log_file_name:
-        log.append(np.loadtxt(f'data_exp_1/{exp_num}_keys/{file_name}', delimiter=","))
+        log.append(np.loadtxt(f'data_exp_1/{key_num}_keys/{file_name}', delimiter=","))
     matrix=[]
     for file_name in matrix_file_name:
-        matrix.append(np.loadtxt(f'data_exp_1/{exp_num}_keys/{file_name}', delimiter=","))
+        matrix.append(np.loadtxt(f'data_exp_1/{key_num}_keys/{file_name}', delimiter=","))
     for i in range(len(matrix)):
         matrix[i],log[i]=clear_data(matrix[i],log[i])
-    plt.figure(f'Эксперимент №1 ({exp_num} клавиш)')    
+    
+    plt.figure(f'Эксперимент №1 ({key_num} клавиш)')    
     
     #рассчитываем:
     n=[]
@@ -350,7 +359,7 @@ def processing_experiment_1_results(exp_num,log_file_name, matrix_file_name):
     plot_design()
 
     #выводим результаты
-    print(f'\nРезультаты обработки эксперимента №1 ({exp_num} клавиш)\n'
+    print(f'\nРезультаты обработки эксперимента №1 ({key_num} клавиш)\n'
           f'Объём выборки для анализа:\n'
           f'{n}\n'
           f'Количество информации I, бит:\n'
@@ -368,26 +377,90 @@ def processing_experiment_1_results(exp_num,log_file_name, matrix_file_name):
           f'Достаточное количества опытов (E={E_ideal}%):\n'
           f'{N}\n'
           f'Параметры закона Хика: T=a+bI\n'
-          f'Невзвешенный метод:\n'
+          f'\nНевзвешенный метод:\n'
           f'a={np.round(a,2)}+-{eps_a} мс, b={np.round(b,2)}+-{np.round(eps_b,2)} мс/бит\n'
           f'Скорость передачи информации: {np.round(1000/b,2)} бит/с\n'
           f'Латентный период: {np.round(a,2)} мс\n'
           f'Доверительные интервалы для ВР, мс:\n'
           f'{np.round(eps_T,2)}\n'
-          f'Взвешенный метод:\n'
+          f'\nВзвешенный метод:\n'
           f'a={np.round(a_w,2)} мс, b={np.round(b_w,2)} мс/бит\n'
           f'Скорость передачи информации: {np.round(1000/b_w,2)} бит/с\n'
           f'Латентный период: {np.round(a_w,2)} мс\n'
           )
     return
 
+def dot_plot(I,t,color='#f44336'):
+    plt.plot(I, t, 'o', color=color)
+    return
+
+def processing_experiment_2_results(key_num,log_file_name, matrix_file_name):
+    #форматируем файлы
+    for log in log_file_name:
+        file_formatting(f'data_exp_2/{key_num}_keys/{log}')
+    for matrix in matrix_file_name:
+        file_formatting(f'data_exp_2/{key_num}_keys/{matrix}')
+
+    #считываем данные с файлов
+    log=[]
+    for file_name in log_file_name:
+        log.append(np.loadtxt(f'data_exp_2/{key_num}_keys/{file_name}', delimiter=","))
+    matrix=[]
+    for file_name in matrix_file_name:
+        matrix.append(np.loadtxt(f'data_exp_2/{key_num}_keys/{file_name}', delimiter=","))
+
+    plt.figure(f'Эксперимент №2 ({key_num} клавиш)')
+
+    #строим диаграмму информационного канала
+    info_channel_diagram=[]
+    I_X_Y=[]
+    for m in matrix:
+        info_channel_diagram.append(info_channel_diagram_count(m))
+        I_X_Y.append(info_channel_diagram[-1][2])
+
+    #строим точки на графике
+    exposure_time=[]
+    for time in exp_2[f'{key_num}']:
+        exposure_time.append(int(time))
+    
+    for i in range(len(I_X_Y)):
+        dot_plot(I_X_Y[i], exposure_time[i])
+
+    #строим прямые линейных регрессий
+    a,b=linear_regression_LSM_plot(I_X_Y,exposure_time,precision_tube=False)
+    a_w, b_w=linear_regression_weighted_LSM_plot(I_X_Y,exposure_time,log)
+    plot_design()
+
+    #выводим результаты
+    info_channel_diagram_string=''
+    for i in range(len(info_channel_diagram)):
+        info_channel_diagram_string+=(f'\nВремя экспозиции: {exp_2[f'{key_num}'][i]} мс\n')
+        info_channel_diagram_string+=(f'H(X)={np.round(info_channel_diagram[i][0],4)} бит\n'
+                                        f'H(X/Y)={np.round(info_channel_diagram[i][1],4)} бит\n'
+                                        f'I(X,Y)={np.round(info_channel_diagram[i][2],4)} бит\n'
+                                        f'H(Y/X)={np.round(info_channel_diagram[i][3],4)} бит\n'
+                                        f'H(Y)={np.round(info_channel_diagram[i][4],4)} бит\n')
+    
+    print(f'\nРезультаты обработки эксперимента №2 ({key_num} клавиш)\n'
+          f'Диаграммы информационного канала:\n'
+          f'{info_channel_diagram_string}\n'
+          f'Параметры закона Хика: T=a+bI\n'
+          f'\nНевзвешенный метод:\n'
+          f'a={np.round(a,2)} мс, b={np.round(b,2)} мс/бит\n'
+          f'Скорость передачи информации: {np.round(1000/b,2)} бит/с\n'
+          f'Латентный период: {np.round(a,2)} мс\n'
+          f'\nВзвешенный метод:\n'
+          f'a={np.round(a_w,2)} мс, b={np.round(b_w,2)} мс/бит\n'
+          f'Скорость передачи информации: {np.round(1000/b_w,2)} бит/с\n'
+          f'Латентный период: {np.round(a_w,2)} мс\n'
+          )
+    return
 
 #основная программа
 if __name__ == "__main__":
     log_file_name=[[],[]]
     matrix_file_name=[[],[]]
-    exp_1={'13':['1','3','6','9','13'],
-        '17':['1','3','6','9','13','17']}
+    
     for i in exp_1['13']:
         log_file_name[0].append(f'log_{13}_keys_{i}_stim.csv')
         matrix_file_name[0].append(f'matrix_{13}_keys_{i}_stim.csv')
@@ -396,8 +469,18 @@ if __name__ == "__main__":
         matrix_file_name[1].append(f'matrix_{17}_keys_{i}_stim.csv')
     processing_experiment_1_results(13,log_file_name[0],matrix_file_name[0])
     processing_experiment_1_results(17,log_file_name[1],matrix_file_name[1])
+
+    log_file_name=[[],[]]
+    matrix_file_name=[[],[]]
+    for i in exp_2['13']:
+        log_file_name[0].append(f'log_{13}_keys_{i}_ms.csv')
+        matrix_file_name[0].append(f'matrix_{13}_keys_{i}_ms.csv')
+    for i in exp_2['17']:
+        log_file_name[1].append(f'log_{17}_keys_{i}_ms.csv')
+        matrix_file_name[1].append(f'matrix_{17}_keys_{i}_ms.csv')
+
+
+    processing_experiment_2_results(13,log_file_name[0], matrix_file_name[0])
+    processing_experiment_2_results(17,log_file_name[1], matrix_file_name[1])
     plt.show()
 
-    exp_2={'13':['500','450','400','350'],
-           '17':['600','550','500','450','400']}
-    
