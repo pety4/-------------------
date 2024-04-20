@@ -39,11 +39,23 @@ z=1.96
 #желаемый показатель точности
 E_ideal=4.8
 
+#Фамилия экспериментатора
+#experimenter_last_name='Orlov'
+#experimenter_last_name='Dementeva'
+experimenter_last_name='Mylnikov'
+
 #данные об экспериментах
 exp_1={'13':['1','3','6','9','13'],
     '17':['1','3','6','9','13','17']}
-exp_2={'13':['500','450','400','350'],
-           '17':['600','550','500','450','400']}
+
+#Орлов
+#exp_2={'13':['500','450','400','350'],
+#           '17':['600','550','500','450','400']}
+
+
+#Мыльников
+exp_2={'13':['500','450','440','390','340','290'],
+           '17':['500','480','430','380','330']}
 
 
 #функция очистки данных от выбросов и ложных нажатий
@@ -309,21 +321,21 @@ def linear_regression_weighted_LSM_plot(I,reaction_time,log):
 def processing_experiment_1_results(key_num,log_file_name, matrix_file_name):
     #форматируем файлы
     for log in log_file_name:
-        file_formatting(f'data_exp_1/{key_num}_keys/{log}')
+        file_formatting(f'{experimenter_last_name}/data_exp_1/{key_num}_keys/{log}')
     for matrix in matrix_file_name:
-        file_formatting(f'data_exp_1/{key_num}_keys/{matrix}')
+        file_formatting(f'{experimenter_last_name}/data_exp_1/{key_num}_keys/{matrix}')
 
     #считываем данные с файлов и убираем выбросы и неверные нажатия
     log=[]
     for file_name in log_file_name:
-        log.append(np.loadtxt(f'data_exp_1/{key_num}_keys/{file_name}', delimiter=","))
+        log.append(np.loadtxt(f'{experimenter_last_name}/data_exp_1/{key_num}_keys/{file_name}', delimiter=","))
     matrix=[]
     for file_name in matrix_file_name:
-        matrix.append(np.loadtxt(f'data_exp_1/{key_num}_keys/{file_name}', delimiter=","))
+        matrix.append(np.loadtxt(f'{experimenter_last_name}/data_exp_1/{key_num}_keys/{file_name}', delimiter=","))
     for i in range(len(matrix)):
         matrix[i],log[i]=clear_data(matrix[i],log[i])
     
-    plt.figure(f'Эксперимент №1 ({key_num} клавиш)')    
+    plt.figure(f'Эксперимент №1 ({key_num} клавиш) ({experimenter_last_name})')    
     
     #рассчитываем:
     n=[]
@@ -378,7 +390,7 @@ def processing_experiment_1_results(key_num,log_file_name, matrix_file_name):
           f'{N}\n'
           f'Параметры закона Хика: T=a+bI\n'
           f'\nНевзвешенный метод:\n'
-          f'a={np.round(a,2)}+-{eps_a} мс, b={np.round(b,2)}+-{np.round(eps_b,2)} мс/бит\n'
+          f'a={np.round(a,2)}+-{np.round(eps_a,2)} мс, b={np.round(b,2)}+-{np.round(eps_b,2)} мс/бит\n'
           f'Скорость передачи информации: {np.round(1000/b,2)} бит/с\n'
           f'Латентный период: {np.round(a,2)} мс\n'
           f'Доверительные интервалы для ВР, мс:\n'
@@ -397,19 +409,19 @@ def dot_plot(I,t,color='#f44336'):
 def processing_experiment_2_results(key_num,log_file_name, matrix_file_name):
     #форматируем файлы
     for log in log_file_name:
-        file_formatting(f'data_exp_2/{key_num}_keys/{log}')
+        file_formatting(f'{experimenter_last_name}/data_exp_2/{key_num}_keys/{log}')
     for matrix in matrix_file_name:
-        file_formatting(f'data_exp_2/{key_num}_keys/{matrix}')
+        file_formatting(f'{experimenter_last_name}/data_exp_2/{key_num}_keys/{matrix}')
 
     #считываем данные с файлов
     log=[]
     for file_name in log_file_name:
-        log.append(np.loadtxt(f'data_exp_2/{key_num}_keys/{file_name}', delimiter=","))
+        log.append(np.loadtxt(f'{experimenter_last_name}/data_exp_2/{key_num}_keys/{file_name}', delimiter=","))
     matrix=[]
     for file_name in matrix_file_name:
-        matrix.append(np.loadtxt(f'data_exp_2/{key_num}_keys/{file_name}', delimiter=","))
+        matrix.append(np.loadtxt(f'{experimenter_last_name}/data_exp_2/{key_num}_keys/{file_name}', delimiter=","))
 
-    plt.figure(f'Эксперимент №2 ({key_num} клавиш)')
+    plt.figure(f'Эксперимент №2 ({key_num} клавиш) ({experimenter_last_name})')
 
     #строим диаграмму информационного канала
     info_channel_diagram=[]
