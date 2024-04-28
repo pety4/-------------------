@@ -46,13 +46,15 @@ experimenter_last_name='Orlov'
 #experimenter_last_name='Mylnikov'
 
 #данные об экспериментах
-exp_1={'13':['1','3','6','9','13'],
-    '17':['1','3','6','9','13','17']}
-
 #Орлов
-exp_2={'13':['500','450','400','350'],
-           '17':['550','500','450','400']}
-
+exp_1={'1_13':['1','3','6','9','13'],
+    '1_17':['1','3','6','9','13','17'],
+    '2_13':['1','3','6','9','13'],
+    '2_17':['1','3','6','9','13','17']}
+exp_2={'1_13':['550','520','470','420','370'],
+        '1_17':['600','550','500','450','400','350'],
+        '2_13':['600','580','530','480','430','380'],
+        '2_17':['600','550','500','450','400','350']}
 
 #Мыльников
 #exp_2={'13':['500','450','440','390','340','290'],
@@ -409,7 +411,7 @@ def dot_plot(I,t,color='#f44336'):
     return
 
 #функция построения диаграммы информационного канала
-def info_channel_diagram_window_create(info_channel_diagram, exposure_time, keyboard_num):
+def info_channel_diagram_window_create(info_channel_diagram, exposure_time, keyboard_num, key_num):
     font_style=("Times New Roman",12)
     H_X,H_X_cond_Y,I_X_Y,H_Y_cond_X,H_Y=info_channel_diagram
     info_channel_diagram_window=Tk()
@@ -428,7 +430,7 @@ def info_channel_diagram_window_create(info_channel_diagram, exposure_time, keyb
     
     canvas.create_text(2, 2,
                        anchor=NW,
-                       text=f'Клавиатура №{keyboard_num}\n'
+                       text=f'Клавиатура №{keyboard_num} ({key_num} клавиш)\n'
                        f'Экспозиция: {exposure_time} мс',
                        font=font_style)
     canvas.create_text(20, (n-65)/2,
@@ -481,7 +483,7 @@ def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_f
 
     #строим точки на графике
     exposure_time=[]
-    for time in exp_2[f'{key_num}']:
+    for time in exp_2[f'{keyboard_num}_{key_num}']:
         exposure_time.append(int(time))
     
     for i in range(len(I_X_Y)):
@@ -495,8 +497,8 @@ def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_f
     #выводим результаты
     info_channel_diagram_string=''
     for i in range(len(info_channel_diagram)):
-        info_channel_diagram_window_create(info_channel_diagram[i],exp_2[f'{key_num}'][i],keyboard_num)
-        info_channel_diagram_string+=(f'\nВремя экспозиции: {exp_2[f'{key_num}'][i]} мс\n')
+        info_channel_diagram_window_create(info_channel_diagram[i],exp_2[f'{keyboard_num}_{key_num}'][i],keyboard_num, key_num)
+        info_channel_diagram_string+=(f'\nВремя экспозиции: {exp_2[f'{keyboard_num}_{key_num}'][i]} мс\n')
         info_channel_diagram_string+=(f'H(X)={np.round(info_channel_diagram[i][0],4)} бит\n'
                                         f'H(X/Y)={np.round(info_channel_diagram[i][1],4)} бит\n'
                                         f'I(X,Y)={np.round(info_channel_diagram[i][2],4)} бит\n'
@@ -518,30 +520,37 @@ def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_f
           )
     return
 
-#основная программа
-if __name__ == "__main__":
+#функция обработки результатов
+def processing_results(keyboard_num):
     log_file_name=[[],[]]
     matrix_file_name=[[],[]]
-    
-    for i in exp_1['13']:
+
+    for i in exp_1[f'{keyboard_num}_13']:
         log_file_name[0].append(f'log_{13}_keys_{i}_stim.csv')
         matrix_file_name[0].append(f'matrix_{13}_keys_{i}_stim.csv')
-    for i in exp_1['17']:
+    for i in exp_1[f'{keyboard_num}_17']:
         log_file_name[1].append(f'log_{17}_keys_{i}_stim.csv')
         matrix_file_name[1].append(f'matrix_{17}_keys_{i}_stim.csv')
+    
     processing_experiment_1_results(13,1,log_file_name[0],matrix_file_name[0])
     processing_experiment_1_results(17,1,log_file_name[1],matrix_file_name[1])
 
     log_file_name=[[],[]]
     matrix_file_name=[[],[]]
-    for i in exp_2['13']:
+
+    for i in exp_2[f'{keyboard_num}_13']:
         log_file_name[0].append(f'log_{13}_keys_{i}_ms.csv')
         matrix_file_name[0].append(f'matrix_{13}_keys_{i}_ms.csv')
-    for i in exp_2['17']:
+    for i in exp_2[f'{keyboard_num}_17']:
         log_file_name[1].append(f'log_{17}_keys_{i}_ms.csv')
         matrix_file_name[1].append(f'matrix_{17}_keys_{i}_ms.csv')
 
-
-    processing_experiment_2_results(13,1,log_file_name[0], matrix_file_name[0])
-    processing_experiment_2_results(17,1,log_file_name[1], matrix_file_name[1])
+    processing_experiment_2_results(13,keyboard_num,log_file_name[0], matrix_file_name[0])
+    processing_experiment_2_results(17,keyboard_num,log_file_name[1], matrix_file_name[1])
     plt.show()
+    return
+
+#основная программа
+if __name__ == "__main__":
+    processing_results(1)
+    processing_results(2)
