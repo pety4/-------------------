@@ -51,10 +51,14 @@ exp_1={'1_13':['1','3','6','9','13'],
     '1_17':['1','3','6','9','13','17'],
     '2_13':['1','3','6','9','13'],
     '2_17':['1','3','6','9','13','17']}
-exp_2={'1_13':['550','520','470','420','370'],
-        '1_17':['600','550','500','450','400','350'],
-        '2_13':['600','580','530','480','430','380'],
-        '2_17':['600','550','500','450','400','350']}
+exp_2={#'1_13':['550','520','470','420','370'],
+       '1_13':['520','470','420','370'],
+        #'1_17':['600','550','500','450','400','350'],
+        '1_17':['550','500','450','400','350'],
+        #'2_13':['600','580','530','480','430','380'],
+        '2_13':['530','480','430','380'],
+        #'2_17':['600','550','500','450','400','350']
+        '2_17':['600','550','450','400','350']}
 
 #Мыльников
 #exp_2={'13':['500','450','440','390','340','290'],
@@ -232,7 +236,7 @@ def accuracy_rate_count(z,log):
 
 #функция построения доверительного интервала
 def confidence_interval_plot(I,t,confidence_interval, color='#2187bb'):
-    horizontal_line_width=0.22
+    horizontal_line_width=0.1
     left = I - horizontal_line_width / 2
     top = t - confidence_interval
     right = I + horizontal_line_width / 2
@@ -522,6 +526,9 @@ def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_f
 
 #функция обработки результатов
 def processing_results(keyboard_num):
+
+    print(f'Клавиатура №{keyboard_num}:\n')
+
     log_file_name=[[],[]]
     matrix_file_name=[[],[]]
 
@@ -532,8 +539,8 @@ def processing_results(keyboard_num):
         log_file_name[1].append(f'log_{17}_keys_{i}_stim.csv')
         matrix_file_name[1].append(f'matrix_{17}_keys_{i}_stim.csv')
     
-    processing_experiment_1_results(13,1,log_file_name[0],matrix_file_name[0])
-    processing_experiment_1_results(17,1,log_file_name[1],matrix_file_name[1])
+    processing_experiment_1_results(13,keyboard_num,log_file_name[0],matrix_file_name[0])
+    processing_experiment_1_results(17,keyboard_num,log_file_name[1],matrix_file_name[1])
 
     log_file_name=[[],[]]
     matrix_file_name=[[],[]]
