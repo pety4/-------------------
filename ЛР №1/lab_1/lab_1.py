@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 import fileinput
 import matplotlib.pyplot as plt
@@ -42,8 +41,6 @@ E_ideal=4.8
 
 #Фамилия экспериментатора
 experimenter_last_name='Orlov'
-#experimenter_last_name='Dementeva'
-#experimenter_last_name='Mylnikov'
 
 #данные об экспериментах
 #Орлов
@@ -51,24 +48,27 @@ exp_1={'1_13':['1','3','6','9','13'],
     '1_17':['1','3','6','9','13','17'],
     '2_13':['1','3','6','9','13'],
     '2_17':['1','3','6','9','13','17']}
-exp_2={#'1_13':['550','520','470','420','370'],
-       '1_13':['520','470','420','370'],
-        #'1_17':['600','550','500','450','400','350'],
-        '1_17':['550','500','450','400','350'],
-        #'2_13':['600','580','530','480','430','380'],
-        '2_13':['530','480','430','380'],
-        #'2_17':['600','550','500','450','400','350']
-        '2_17':['600','550','450','400','350']}
 
-#Мыльников
-#exp_2={'13':['500','450','440','390','340','290'],
-#           '17':['500','480','430','380','330']}
+#исходные
+exp_2={'1_13':['550','520','470','420','370'],
+       '1_17':['600','550','500','450','400','350'],
+       '2_13':['600','580','530','480','430','380'],
+       '2_17':['600','550','500','450','400','350']}
 
+#очищенные
+'''exp_2={'1_13':['520','470','420','370'],
+       '1_17':['550','500','450','400','350'],
+       '2_13':['530','480','430','380'],
+       '2_17':['600','550','450','400','350']}'''
 
 #функция очистки данных от выбросов и ложных нажатий
 def clear_data(matrix,log):
     wrong_measurement=[]
     for measurement in log:
+        if ((measurement[4]==1) or (measurement[4]==3)) and (len(matrix.shape)==1):
+            matrix[int(measurement[1])-1]-=1
+            wrong_measurement.append(int(measurement[0])-1)
+            continue
         if (measurement[4]==1) or (measurement[4]==3):
             matrix[int(measurement[1])-1,int(measurement[2])-1]-=1
             wrong_measurement.append(int(measurement[0])-1)
@@ -342,7 +342,7 @@ def processing_experiment_1_results(key_num,keyboard_num,log_file_name, matrix_f
     for i in range(len(matrix)):
         matrix[i],log[i]=clear_data(matrix[i],log[i])
     
-    plt.figure(f'Эксперимент №1 ({key_num} клавиш) ({experimenter_last_name})')    
+    plt.figure(f'Эксперимент №1 ({key_num} клавиш) ({experimenter_last_name})', figsize=(7,5))    
     
     #рассчитываем:
     n=[]
@@ -434,7 +434,7 @@ def info_channel_diagram_window_create(info_channel_diagram, exposure_time, keyb
     
     canvas.create_text(2, 2,
                        anchor=NW,
-                       text=f'Клавиатура №{keyboard_num} ({key_num} клавиш)\n'
+                       text=f'Клавиатура №{keyboard_num} ({key_num} стимулов)\n'
                        f'Экспозиция: {exposure_time} мс',
                        font=font_style)
     canvas.create_text(20, (n-65)/2,
@@ -461,7 +461,7 @@ def info_channel_diagram_window_create(info_channel_diagram, exposure_time, keyb
 
 
 
-def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_file_name):
+def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_file_name, info_channel_diagram_show=True):
     #форматируем файлы
     for log in log_file_name:
         file_formatting(f'{experimenter_last_name}/keyboard_{keyboard_num}/data_exp_2/{key_num}_keys/{log}')
@@ -476,7 +476,7 @@ def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_f
     for file_name in matrix_file_name:
         matrix.append(np.loadtxt(f'{experimenter_last_name}/keyboard_{keyboard_num}/data_exp_2/{key_num}_keys/{file_name}', delimiter=","))
 
-    plt.figure(f'Эксперимент №2 ({key_num} клавиш) ({experimenter_last_name})')
+    plt.figure(f'Эксперимент №2 ({key_num} клавиш) ({experimenter_last_name})', figsize=(7,5))
 
     #строим диаграмму информационного канала
     info_channel_diagram=[]
@@ -501,7 +501,8 @@ def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_f
     #выводим результаты
     info_channel_diagram_string=''
     for i in range(len(info_channel_diagram)):
-        info_channel_diagram_window_create(info_channel_diagram[i],exp_2[f'{keyboard_num}_{key_num}'][i],keyboard_num, key_num)
+        if info_channel_diagram_show==True:
+            info_channel_diagram_window_create(info_channel_diagram[i],exp_2[f'{keyboard_num}_{key_num}'][i],keyboard_num, key_num)
         info_channel_diagram_string+=(f'\nВремя экспозиции: {exp_2[f'{keyboard_num}_{key_num}'][i]} мс\n')
         info_channel_diagram_string+=(f'H(X)={np.round(info_channel_diagram[i][0],4)} бит\n'
                                         f'H(X/Y)={np.round(info_channel_diagram[i][1],4)} бит\n'
@@ -525,7 +526,7 @@ def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_f
     return
 
 #функция обработки результатов
-def processing_results(keyboard_num):
+def processing_results(keyboard_num, info_channel_diagram_show=True):
 
     print(f'Клавиатура №{keyboard_num}:\n')
 
@@ -552,12 +553,12 @@ def processing_results(keyboard_num):
         log_file_name[1].append(f'log_{17}_keys_{i}_ms.csv')
         matrix_file_name[1].append(f'matrix_{17}_keys_{i}_ms.csv')
 
-    processing_experiment_2_results(13,keyboard_num,log_file_name[0], matrix_file_name[0])
-    processing_experiment_2_results(17,keyboard_num,log_file_name[1], matrix_file_name[1])
+    processing_experiment_2_results(13,keyboard_num,log_file_name[0], matrix_file_name[0], info_channel_diagram_show)
+    processing_experiment_2_results(17,keyboard_num,log_file_name[1], matrix_file_name[1], info_channel_diagram_show)
     plt.show()
     return
 
 #основная программа
 if __name__ == "__main__":
-    processing_results(1)
-    processing_results(2)
+    processing_results(1, info_channel_diagram_show=False)
+    processing_results(2, info_channel_diagram_show=False)
