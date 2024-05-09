@@ -404,15 +404,15 @@ def processing_experiment_1_results(key_num,keyboard_num,log_file_name, matrix_f
           f'{N}\n'
           f'Параметры закона Хика: ВР=a+bI\n'
           f'\nНевзвешенный метод:\n'
-          f'a={np.round(a,2)}+-{np.round(eps_a,2)} мс, b={np.round(b,2)}+-{np.round(eps_b,2)} мс/бит\n'
-          f'Скорость передачи информации: {np.round(1000/b,2)} бит/с\n'
-          f'Латентный период: {np.round(a,2)} мс\n'
-          f'Доверительные интервалы для ВР, мс:\n'
-          f'{np.round(eps_T,2)}\n'
+          f'a={np.round(a/1000,4)}+-{np.round(eps_a/1000,4)} с, b={np.round(b/1000,4)}+-{np.round(eps_b/1000,4)} с/бит\n'
+          f'Скорость передачи информации: {np.round(1000/b,4)} бит/с\n'
+          f'Латентный период: {np.round(a/1000,4)} с\n'
+          f'Доверительные интервалы для ВР, с:\n'
+          f'{np.round(eps_T,4)}\n'
           f'\nВзвешенный метод:\n'
-          f'a={np.round(a_w,2)} мс, b={np.round(b_w,2)} мс/бит\n'
-          f'Скорость передачи информации: {np.round(1000/b_w,2)} бит/с\n'
-          f'Латентный период: {np.round(a_w,2)} мс\n'
+          f'a={np.round(a_w/1000,4)} с, b={np.round(b_w/1000,4)} с/бит\n'
+          f'Скорость передачи информации: {np.round(1000/b_w,4)} бит/с\n'
+          f'Латентный период: {np.round(a_w/1000,4)} с\n'
           )
     return
 
@@ -522,13 +522,13 @@ def processing_experiment_2_results(key_num,keyboard_num,log_file_name, matrix_f
           f'{info_channel_diagram_string}\n'
           f'Параметры закона Хика: ВР=a+bI\n'
           f'\nНевзвешенный метод:\n'
-          f'a={np.round(a,2)} мс, b={np.round(b,2)} мс/бит\n'
-          f'Скорость передачи информации: {np.round(1000/b,2)} бит/с\n'
-          f'Латентный период: {np.round(a,2)} мс\n'
+          f'a={np.round(a/1000,4)} с, b={np.round(b/1000,4)} с/бит\n'
+          f'Скорость передачи информации: {np.round(1000/b,4)} бит/с\n'
+          f'Латентный период: {np.round(a/1000,4)} с\n'
           f'\nВзвешенный метод:\n'
-          f'a={np.round(a_w,2)} мс, b={np.round(b_w,2)} мс/бит\n'
-          f'Скорость передачи информации: {np.round(1000/b_w,2)} бит/с\n'
-          f'Латентный период: {np.round(a_w,2)} мс\n'
+          f'a={np.round(a_w/1000,4)} с, b={np.round(b_w/1000,4)} с/бит\n'
+          f'Скорость передачи информации: {np.round(1000/b_w,4)} бит/с\n'
+          f'Латентный период: {np.round(a_w/1000,4)} с\n'
           )
     return
 
